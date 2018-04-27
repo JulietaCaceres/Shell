@@ -3,28 +3,24 @@
 // sets the "key" argument with the key part of
 // the "arg" argument and null-terminates it
 static void get_environ_key(char* arg, char* key) {
-	printf("entro al get environ key \n");
-	printf("arg: %s\n:",arg);	
+		
 	int i;
 	for (i = 0; arg[i] != '='; i++)
 		key[i] = arg[i];
 
 	key[i] = END_STRING;
-	printf("key: %s\n",key);
+	
 }
 
 // sets the "value" argument with the value part of
 // the "arg" argument and null-terminates it
 static void get_environ_value(char* arg, char* value, int idx) {
-	printf("entro al get environ value \n");
-	printf("arg: %s\n:",arg);
-	printf("idx: %d\n:",idx);
+	
 	int i, j;
 	for (i = (idx + 1), j = 0; i < strlen(arg); i++, j++)
 		value[j] = arg[i];
 
 	value[j] = END_STRING;
-	printf("value: %s\n", value);
 }
 
 // sets the environment variables passed
@@ -36,28 +32,22 @@ static void get_environ_value(char* arg, char* value, int idx) {
 // - 'get_environ_*()' can be useful here
 static void set_environ_vars(char** eargv, int eargc) {
 	
-	printf("entro \n");
 	pid_t p;
 	int status = 0;
 	if ((p = fork()) == 0) {
 		for(int i = 0 ; i <= eargc ; i++){
-			printf("entro al fork y al for \n");
 			char key[100];
 			char* pKey = key;
 			get_environ_key(eargv[i],pKey);
-			printf("key: %s\n:",key);	
 			int posicionIgual = block_contains(eargv[i],'=');	
 			char value[100];
 			char* pValue = value;
 			get_environ_value(eargv[i], pValue, posicionIgual);
-			printf("value: %S\n",value);
 			int res =setenv(key ,value , 0 );
-			if(res < 0){
-				perror("setenv() error");
-			}else{printf("en teoria la seteo \n");};
-		}
-	}	
-
+			if(res < 0)
+			  perror("setenv() error");
+		}	
+	}
 } 
 
 // opens the file in which the stdin/stdout or
@@ -87,9 +77,7 @@ void exec_cmd(struct cmd* cmd) {
 
 		case EXEC: {
 			// spawns a command
-			//if( block_contains(cmd->scmd,"=") > 0){
 			if(((struct execcmd*)cmd)->eargc > 0){
-				printf("en teoria empieza a setear variavles \n");
 				char* eargv =((struct execcmd*)cmd)->eargv;
 			        int cantEarg = ((struct execcmd*)cmd)->eargc;				
 				set_environ_vars(eargv,cantEarg);

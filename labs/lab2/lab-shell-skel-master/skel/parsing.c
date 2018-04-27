@@ -114,16 +114,14 @@ static void  getTokenWithoutS(char* arg){
 // 	 to 'arg' 
 static char* expand_environ_var(char* arg) {
         if(arg[0] == '$'){ 
-	//getTokenWithoutS(&arg);
-	int len = strlen(arg) + 1;
-        char newArg[len -1];
-
-        for (int i = 1; i<len;i++){
-            newArg[i-1] = arg[i];}
-	free(arg);	
-	arg = newArg;
-        arg = getenv(newArg);
-	free(newArg);
+		int len = strlen(arg) + 1;
+      		char newArg[len -1];
+	        for (int i = 1; i<len;i++)
+        	    newArg[i-1] = arg[i];
+		free(arg);	
+		arg = newArg;
+       		arg = getenv(newArg);
+		free(newArg);
         } 
 	return arg;
 }
