@@ -61,9 +61,9 @@ static void set_environ_vars(char** eargv, int eargc) {
 // - if O_CREAT is used, add S_IWUSR and S_IRUSR
 // 	to make it a readable normal file
 static int open_redir_fd(char* file) {
-
-	// Your code here
-	return -1;
+	
+	int fd =  open(file,O_CREAT|O_WRONLY|O_TRUNC|O_RDONLY,S_IRUSR|S_IWUSR);
+	return fd;
 }
 
 // executes a command - does not return
@@ -95,17 +95,57 @@ void exec_cmd(struct cmd* cmd) {
 		}
 		case BACK: {
 			// runs a command in background
-			cmd->type = EXEC;
-			exec_cmd(cmd);				
+			struct backcmd* cmdb = (struct backcmd*)cmd;
+			exec_cmd(cmdb->c);				
 			_exit(-1);
 			break;
 		}
 
 		case REDIR: {
-			// changes the input/output/stderr flow
-			//
-			// Your code here
-			printf("Redirections are not yet implemented\n");
+			
+			struct execcmd* cmdr = (struct execcmd*)cmd;
+                        char const  *fileName=cmdr->argv[0];
+                        char *  const *argv = cmdr->argv;
+                        if(strlen(cmdr->out_file)>0){
+				printf("entro on \n");
+				int fd = open_redir_fd(cmdr->out_file);	
+				if( fd < 0)
+                              	   perror("open() error");
+				dup2(fd, STDOUT_FILENO);
+				close(fd);
+				
+			}
+			if(strlen(cmdr->in_file)>0){
+				  
+				printf("entro in \n");
+				int fd =  open(cmdr->in_file,O_RDONLY);
+                                if( fd < 0)
+                                   perror("menor que cero");
+				dup2(fd,STDIN_FILENO);
+				close(fd); 
+				
+			}
+			if(strlen(cmdr->err_file)>0){
+				int fd;	
+				int equals = strcmp(cmdr->err_file,"&1");
+				printf("entro a error\n");	
+				if(equals == 0){
+				   	printf("entro a &\n");
+					dup2(STDOUT_FILENO,STDERR_FILENO);
+					
+				}else{	
+					printf("entro err\n");
+					fd = open_redir_fd(cmdr->err_file);
+					if(fd<0)
+                       	                 perror("open() error");
+				}	
+				dup2(fd,STDERR_FILENO);
+				close(fd);	
+			
+		      }	
+			if(execvp(fileName,argv) < 0)
+				perror("execvp() error");
+	
 			_exit(-1);
 			break;
 		}
